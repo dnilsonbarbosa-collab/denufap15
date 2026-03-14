@@ -1,0 +1,67 @@
+# Criar o Manifest (manifest.json)
+manifest_json = """{
+    "name": "Sistema de Gestão - 1° Pelotão Esperança",
+    "short_name": "Pelotão Esperança",
+    "description": "Sistema integrado de Anotações e Controle de FO+ para o 1° Pelotão Esperança da NUFAP 15",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#1a237e",
+    "theme_color": "#1a237e",
+    "orientation": "portrait-primary",
+    "scope": ".",
+    "lang": "pt-BR",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%231a237e' width='192' height='192' rx='30'/%3E%3Cpath fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' d='M96 40v112M40 96h112'/%3E%3C/svg%3E",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%231a237e' width='512' height='512' rx='80'/%3E%3Cpath fill='none' stroke='white' stroke-width='24' stroke-linecap='round' stroke-linejoin='round' d='M256 100v312M100 256h312'/%3E%3C/svg%3E",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Nova Anotação",
+            "short_name": "Anotação",
+            "description": "Adicionar nova anotação disciplinar",
+            "url": "./anotacoes.html?action=new",
+            "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect fill='%23ff4081' width='96' height='96' rx='20'/%3E%3Cpath fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' d='M48 28v40M28 48h40'/%3E%3C/svg%3E", "sizes": "96x96" }]
+        },
+        {
+            "name": "Exportar FO+",
+            "short_name": "FO+ PDF",
+            "description": "Exportar relatório de folgas operacionais",
+            "url": "./fo-sistema.html",
+            "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect fill='%234caf50' width='96' height='96' rx='20'/%3E%3Cpath fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' d='M28 48h40M48 28v40'/%3E%3C/svg%3E", "sizes": "96x96" }]
+        }
+    ],
+    "categories": ["productivity", "utilities"],
+    "screenshots": [
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 844'%3E%3Crect fill='%23f5f5f5' width='390' height='844'/%3E%3Crect fill='%231a237e' x='0' y='0' width='390' height='200'/%3E%3Ctext fill='white' x='195' y='100' text-anchor='middle' font-family='sans-serif' font-size='24'%3EPelotão Esperança%3C/text%3E%3C/svg%3E",
+            "sizes": "390x844",
+            "type": "image/svg+xml",
+            "form_factor": "narrow"
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false
+}"""
+
+# Salvar arquivos
+with open('/mnt/kimi/output/sw.js', 'w', encoding='utf-8') as f:
+    f.write(sw_code)
+
+with open('/mnt/kimi/output/manifest.json', 'w', encoding='utf-8') as f:
+    f.write(manifest_json)
+
+print("✅ Arquivos criados:")
+print("   - sw.js (Service Worker)")
+print("   - manifest.json (Manifesto PWA)")
+print(f"\nTamanho SW: {len(sw_code)} caracteres")
+print(f"Tamanho Manifest: {len(manifest_json)} caracteres")
