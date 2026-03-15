@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1a237e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gestão Militar">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Gestão Militar">
+    
+    <title>Sistema de Gestão - 1° Pelotão Esperança</title>
+    
+    <!-- Manifest para PWA -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Ícones -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%231a237e' width='192' height='192' rx='30'/%3E%3Cpath fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' d='M96 40v112M40 96h112'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%231a237e' width='180' height='180' rx='30'/%3E%3Cpath fill='none' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' d='M90 45v90M45 90h90'/%3E%3C/svg%3E">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #1a237e;
+            --primary-light: #3949ab;
+            --accent: #ff4081;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #212121;
+            --text-secondary: #757575;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            background-attachment: fixed;
+            color: white;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Estilo quando instalado como PWA */
+        body.installed {
+            /* Ajustes específicos para app instalado */
+        }
+
+        .container {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0 20px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 24px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .btn-sair {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-sair:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-sair:active {
+            transform: scale(0.95);
+        }
+
+        .systems-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 20px 0;
+            align-content: flex-start;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .systems-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                align-content: center;
+                padding: 40px 0;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .systems-grid {
+                align-content: flex-start;
+            }
+            
+            .header {
+                padding: 20px 0 15px;
+            }
+            
+            .logo {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+
+        .system-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 24px;
+            text-decoration: none;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .system-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .system-card:active {
+            transform: scale(0.98);
+        }
+
+        /* Badge "Offline" nos cards */
+        .system-card::after {
+            content: '⚡';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .system-card.offline-ready::after {
+            opacity: 1;
+        }
+
+        .system-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 16px;
+            transition: transform 0.3s;
+        }
+
+        .system-card:hover .system-icon {
+            transform: scale(1.1);
+        }
+
+        .system-card.anotacoes .system-icon {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: var(--primary);
+        }
+
+        .system-card.fo .system-icon {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: var(--success);
+        }
+
+        .system-card h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .system-card.fo h2 {
+            color: var(--success);
+        }
+
+        .system-card .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .system-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        .system-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .system-card.fo .stat-value {
+            color: var(--success);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 16px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+
+        .footer .version {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .system-card {
+            animation: slideUp 0.6s ease-out backwards;
+        }
+
+        .system-card:nth-child(1) { animation-delay: 0.1s; }
+        .system-card:nth-child(2) { animation-delay: 0.2s; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Botão de instalação */
+        #install-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 4px rgba(76, 175, 80, 0.3);
+            cursor: pointer;
+            z-index: 9999;
+            font-family: system-ui, sans-serif;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        #install-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.4), 0 0 0 6px rgba(76, 175, 80, 0.2);
+        }
+
+        #install-btn:active {
+            transform: scale(0.95);
+        }
+
+        #install-btn.hidden {
+            display: none;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Notificação de atualização */
+        .update-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: system-ui, sans-serif;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 90%;
+        }
+
+        .update-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .update-toast button {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .update-toast button:hover {
+            background: #f50057;
+            transform: scale(1.05);
+        }
+
+        /* Indicador de status online/offline */
+        .connection-status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ff9800;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transform: translateY(-100%);
+            transition: transform 0.3s;
+            z-index: 9998;
+        }
+
+        .connection-status.offline {
+            transform: translateY(0);
+        }
+
+        /* Badge de modo standalone */
+        .standalone-badge {
+            position: fixed;
+            top: max(10px, env(safe-area-inset-top));
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+
+        body.installed .standalone-badge {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Indicador de conexão -->
+    <div class="connection-status" id="connection-status">
+        ⚠️ Sem conexão com a internet - Modo offline ativo
+    </div>
+
+    <!-- Badge de app instalado -->
+    <div class="standalone-badge" id="standalone-badge">📲 App</div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">📋</div>
+            <h1>1° Pelotão Esperança</h1>
+            <p>NUFAP 15 - Sistema de Gestão</p>
+            <button class="btn-sair" onclick="sair()">🚪 Sair</button>
+        </header>
+
+        <main class="systems-grid">
+            <a href="anotacoes.html" class="system-card anotacoes" id="card-anotacoes">
+                <div class="system-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <h2>Anotações</h2>
+                <p>Sistema de registro e controle de anotações disciplinares, abonos, justificativas e punições.</p>
+                <div class="system-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="stat-anotacoes">0</div>
+                        <div class="stat-label">Registros</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="fo-sistema.html" class="system-card fo" id="card-fo">
+                <div class="system-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                        <circle cx="17" cy="17" r="3" fill="#4caf50" stroke="none"/>
+                        <path d="M17 15v4M15 17h4" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h2>FO+</h2>
+                <div class="subtitle">Fato Observado Positivamente</div>
+                <p>Registro de atitudes positivas, destaques e ações meritórias dos militares.</p>
+                <div class="system-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="stat-soldados">0</div>
+                        <div class="stat-label">Militares</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-saldo">0</div>
+                        <div class="stat-label">Total FO+</div>
+                    </div>
+                </div>
+            </a>
+        </main>
+
+        <footer class="footer">
+            <p>Sistema de Gestão Militar v2.0</p>
+            <span class="version" id="app-version">Carregando...</span>
+        </footer>
+    </div>
+
+    <!-- Toast genérico -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Botão de instalação (aparece automaticamente) -->
+    <button id="install-btn" class="hidden">
+        <span>📲</span>
+        <span>Instalar App</span>
+    </button>
+
+    <!-- Notificação de atualização -->
+    <div class="update-toast" id="update-toast">
+        <span>🚀 Nova versão disponível!</span>
+        <button onclick="updateApp()">Atualizar Agora</button>
+    </div>
+
+    <script>
+        // ==================== CONFIGURAÇÃO PWA ====================
+
+        // Registro do Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('✅ SW registrado:', registration.scope);
+                        
+                        // Verifica atualizações a cada hora
+                        setInterval(() => {
+                            registration.update();
+                        }, 60 * 60 * 1000);
+
+                        // Detecta novas versões
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showUpdateNotification(newWorker);
+                                }
+                            });
+                        });
+                    })
+                    .catch((err) => {
+                        console.log('❌ SW falhou:', err);
+                    });
+            });
+
+            // Escuta mensagens do SW
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'SYNC_COMPLETE') {
+                    showToast('Sincronização concluída!');
+                }
+            });
+        }
+
+        // Variável para controlar a atualização
+        let waitingWorker = null;
+
+        // Mostra notificação de atualização
+        function showUpdateNotification(worker) {
+            waitingWorker = worker;
+            const toast = document.getElementById('update-toast');
+            toast.classList.add('show');
+        }
+
+        // Atualiza o app
+        function updateApp() {
+            if (waitingWorker) {
+                waitingWorker.postMessage('SKIP_WAITING');
+                window.location.reload();
+            }
+        }
+
+        // ==================== INSTALAÇÃO DO APP ====================
+
+        let deferredPrompt = null;
+        const installBtn = document.getElementById('install-btn');
+
+        // Detecta quando o app pode ser instalado
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.remove('hidden');
+            console.log('👍 App pronto para instalação');
+        });
+
+        // Clique no botão de instalação
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+
+            if (outcome === 'accepted') {
+                console.log('✅ Usuário instalou o app');
+                installBtn.classList.add('hidden');
+            } else {
+                console.log('❌ Usuário recusou instalação');
+            }
+
+            deferredPrompt = null;
+        });
+
+        // Detecta quando o app foi instalado
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 App instalado com sucesso!');
+            installBtn.classList.add('hidden');
+            deferredPrompt = null;
+            showToast('App instalado! Acesse pela tela inicial.');
+        });
+
+        // Verifica se está rodando como app instalado
+        function checkStandalone() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                window.navigator.standalone === true ||
+                                document.referrer.includes('android-app://');
+            
+            if (isStandalone) {
+                document.body.classList.add('installed');
+                console.log('📱 Rodando como app instalado');
+            }
+            return isStandalone;
+        }
+
+        // ==================== FUNÇÃO SAIR ====================
+
+        function sair() {
+            localStorage.removeItem('sessaoUsuario');
+            window.location.href = './login.html';
+        }
+
+        // ==================== FUNCIONALIDADES DO SISTEMA ====================
+
+        // Detecta caminho base para GitHub Pages
+        function getBasePath() {
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(p => p);
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            if (isGitHubPages && parts.length > 0) {
+                return '/' + parts[0] + '/';
+            }
+            return '/';
+        }
+
+        // Corrige links para ambiente
+        function fixLinks() {
+            const basePath = getBasePath();
+            const anotacoesLink = document.getElementById('card-anotacoes');
+            const foLink = document.getElementById('card-fo');
+
+            if (basePath !== '/') {
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes('anotacoes.html')) {
+                    anotacoesLink.href = basePath + 'anotacoes.html';
+                }
+                if (!currentPath.includes('fo-sistema.html')) {
+                    foLink.href = basePath + 'fo-sistema.html';
+                }
+            }
+
+            // Marca cards como "prontos para offline" após carregamento
+            if ('caches' in window) {
+                caches.match('anotacoes.html').then((response) => {
+                    if (response) {
+                        anotacoesLink.classList.add('offline-ready');
+                    }
+                });
+                caches.match('fo-sistema.html').then((response) => {
+                    if (response) {
+                        foLink.classList.add('offline-ready');
+                    }
+                });
+            }
+        }
+
+        // Toast notification
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // Atualiza estatísticas na landing page
+        function updateLandingStats() {
+            try {
+                const anotacoes = JSON.parse(localStorage.getItem('anotacoes')) || [];
+                const foData = JSON.parse(localStorage.getItem('foPlus')) || [];
+                
+                // Animação nos números
+                animateValue('stat-anotacoes', 0, anotacoes.length, 1000);
+                animateValue('stat-soldados', 0, foData.length, 1000);
+                
+                const saldoTotal = foData.reduce((acc, s) => acc + (parseInt(s.total) || 0), 0);
+                animateValue('stat-saldo', 0, saldoTotal, 1000);
+            } catch (e) {
+                console.error('Erro ao carregar estatísticas:', e);
+            }
+        }
+
+        // Animação de contagem
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Monitor de conexão
+        function updateConnectionStatus() {
+            const status = document.getElementById('connection-status');
+            if (!navigator.onLine) {
+                status.classList.add('offline');
+                showToast('Você está offline. Os dados serão sincronizados quando a conexão voltar.');
+            } else {
+                status.classList.remove('offline');
+            }
+        }
+
+        // ==================== INICIALIZAÇÃO ====================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fixLinks();
+            updateLandingStats();
+            checkStandalone();
+            updateConnectionStatus();
+
+            // Mostra versão do app
+            const versionEl = document.getElementById('app-version');
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                // Pergunta ao SW pela versão
+                navigator.serviceWorker.controller.postMessage('GET_VERSION');
+                
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (event.data && event.data.version) {
+                        versionEl.textContent = `Versão ${event.data.version} • PWA Ativo`;
+                    }
+                });
+                
+                // Fallback se não receber resposta
+                setTimeout(() => {
+                    if (versionEl.textContent === 'Carregando...') {
+                        versionEl.textContent = 'Versão 2.0.0 • PWA';
+                    }
+                }, 1000);
+            } else {
+                versionEl.textContent = 'Versão 2.0.0';
+            }
+        });
+
+        // Atualiza quando a aba fica visível novamente
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                updateLandingStats();
+                updateConnectionStatus();
+            }
+        });
+
+        // Monitor de online/offline
+        window.addEventListener('online', () => {
+            updateConnectionStatus();
+            showToast('🌐 Conexão restaurada!');
+        });
+
+        window.addEventListener('offline', () => {
+            updateConnectionStatus();
+        });
+
+        // Debug
+        console.log('🔧 GitHub Pages Debug:', {
+            hostname: window.location.hostname,
+            pathname: window.location.pathname,
+            basePath: getBasePath(),
+            isStandalone: checkStandalone(),
+            swSupported: 'serviceWorker' in navigator
+        });
+    </script>
+</body>
+</html>
