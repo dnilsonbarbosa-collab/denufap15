@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "Sistema de Gestão Militar",
+  "short_name": "Gestão Militar",
+  "description": "Sistema de Gestão Militar - Anotações e FO+",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a237e",
+  "theme_color": "#1a237e",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "id": "gestao-militar-v2",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%231a237e' width='192' height='192' rx='30'/%3E%3Cpath fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' d='M96 40v112M40 96h112'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%231a237e' width='512' height='512' rx='60'/%3E%3Cpath fill='none' stroke='white' stroke-width='16' stroke-linecap='round' stroke-linejoin='round' d='M256 100v312M100 256h312'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 822'%3E%3Crect fill='%231a237e' width='400' height='822'/%3E%3Crect fill='white' x='20' y='100' width='360' height='200' rx='20'/%3E%3Crect fill='%23e3f2fd' x='20' y='320' width='360' height='150' rx='20'/%3E%3C/svg%3E",
+      "sizes": "400x822",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 676'%3E%3Crect fill='%231a237e' width='1280' height='676'/%3E%3Crect fill='white' x='300' y='100' width='680' height='476' rx='20'/%3E%3C/svg%3E",
+      "sizes": "1280x676",
+      "type": "image/svg+xml",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}
