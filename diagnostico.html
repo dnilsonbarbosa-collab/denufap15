@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico PWA - Gestão Militar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a237e;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .status-box {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        .status-ok {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+        .status-error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+        .status-warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            color: #ef6c00;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .check-pass {
+            background: #4caf50;
+            color: white;
+        }
+        .check-fail {
+            background: #f44336;
+            color: white;
+        }
+        .check-warn {
+            background: #ff9800;
+            color: white;
+        }
+        button {
+            background: #1a237e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 16px;
+        }
+        button:hover {
+            background: #3949ab;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico PWA - Gestão Militar</h1>
+
+        <div class="info-box">
+            <strong>ℹ️ Instruções:</strong> Use esta página para verificar se seu PWA está configurado corretamente para instalação como app standalone (sem ícone do Chrome sobreposto).
+        </div>
+
+        <div id="browser-info" class="status-box status-warning">
+            <strong>🌐 Navegador detectado:</strong> <span id="browser-name">Verificando...</span>
+        </div>
+
+        <div id="https-status" class="status-box">
+            <strong>🔒 HTTPS:</strong> <span id="https-text">Verificando...</span>
+        </div>
+
+        <div id="manifest-status" class="status-box">
+            <strong>📋 Manifest.json:</strong> <span id="manifest-text">Verificando...</span>
+        </div>
+
+        <div id="sw-status" class="status-box">
+            <strong>⚙️ Service Worker:</strong> <span id="sw-text">Verificando...</span>
+        </div>
+
+        <div id="install-status" class="status-box">
+            <strong>📱 Instalabilidade:</strong> <span id="install-text">Verificando...</span>
+        </div>
+
+        <h2 style="margin-top: 24px; margin-bottom: 12px; color: #1a237e;">✅ Checklist de Configuração</h2>
+
+        <div id="checklist">
+            <div class="check-item">
+                <div class="check-icon" id="check-standalone">?</div>
+                <div>
+                    <strong>Display: standalone</strong><br>
+                    <small>O app abre sem UI do navegador</small>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="check-icon" id="check-icons">?</div>
+                <div>
+                    <strong>Ícones (192x192 e 512x512)</strong><br>
+                    <small>Tamanhos obrigatórios para instalação</small>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="check-icon" id="check-chrome">?</div>
+                <div>
+                    <strong>Instalação via Chrome</strong><br>
+                    <small>Chrome é necessário para app standalone no Android</small>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="check-icon" id="check-https">?</div>
+                <div>
+                    <strong>HTTPS ativo</strong><br>
+                    <small>Obrigatório para Service Worker e instalação</small>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 24px; margin-bottom: 12px; color: #1a237e;">📖 Como Instalar Corretamente</h2>
+
+        <div class="info-box">
+            <ol style="margin-left: 20px; margin-top: 8px;">
+                <li><strong>Use o Chrome</strong> - Edge/Firefox criam apenas atalhos</li>
+                <li><strong>Acesse via HTTPS</strong - HTTP não permite instalação</li>
+                <li><strong>Toque nos 3 pontos</strong> → "Instalar aplicativo"</li>
+                <li><strong>Verifique a gaveta de apps</strong> - App deve aparecer lá</li>
+                <li><strong>Ícone limpo</strong> - Sem badge do Chrome no canto</li>
+            </ol>
+        </div>
+
+        <div id="results"></div>
+
+        <button onclick="location.href='./index.html'">Voltar ao Sistema</button>
+    </div>
+
+    <script>
+        // Detectar navegador
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            let browser = "Desconhecido";
+
+            if (ua.indexOf("Chrome") > -1 && ua.indexOf("Edg") === -1) {
+                browser = "Chrome ✅ (Recomendado para PWA)";
+                document.getElementById('browser-info').className = 'status-box status-ok';
+                document.getElementById('check-chrome').textContent = '✓';
+                document.getElementById('check-chrome').className = 'check-icon check-pass';
+            } else if (ua.indexOf("Edg") > -1) {
+                browser = "Edge ⚠️ (Pode criar apenas atalho)";
+                document.getElementById('browser-info').className = 'status-box status-warning';
+                document.getElementById('check-chrome').textContent = '✗';
+                document.getElementById('check-chrome').className = 'check-icon check-fail';
+            } else if (ua.indexOf("Firefox") > -1) {
+                browser = "Firefox ⚠️ (Pode criar apenas atalho)";
+                document.getElementById('browser-info').className = 'status-box status-warning';
+                document.getElementById('check-chrome').textContent = '✗';
+                document.getElementById('check-chrome').className = 'check-icon check-fail';
+            } else if (ua.indexOf("Safari") > -1) {
+                browser = "Safari (iOS - Suporta PWA)";
+                document.getElementById('browser-info').className = 'status-box status-ok';
+            }
+
+            document.getElementById('browser-name').textContent = browser;
+        }
+
+        // Verificar HTTPS
+        function checkHTTPS() {
+            const isHTTPS = location.protocol === 'https:' || location.hostname === 'localhost';
+            const httpsStatus = document.getElementById('https-status');
+            const httpsText = document.getElementById('https-text');
+
+            if (isHTTPS) {
+                httpsStatus.className = 'status-box status-ok';
+                httpsText.textContent = 'Ativo ✅ (Obrigatório para instalação)';
+                document.getElementById('check-https').textContent = '✓';
+                document.getElementById('check-https').className = 'check-icon check-pass';
+            } else {
+                httpsStatus.className = 'status-box status-error';
+                httpsText.textContent = 'Inativo ❌ (Instalação bloqueada!)';
+                document.getElementById('check-https').textContent = '✗';
+                document.getElementById('check-https').className = 'check-icon check-fail';
+            }
+        }
+
+        // Verificar Manifest
+        async function checkManifest() {
+            const manifestStatus = document.getElementById('manifest-status');
+            const manifestText = document.getElementById('manifest-text');
+
+            try {
+                const response = await fetch('./manifest.json');
+                if (response.ok) {
+                    const manifest = await response.json();
+
+                    let checks = [];
+                    if (manifest.display === 'standalone') {
+                        checks.push('display: standalone ✅');
+                        document.getElementById('check-standalone').textContent = '✓';
+                        document.getElementById('check-standalone').className = 'check-icon check-pass';
+                    } else {
+                        checks.push(`display: ${manifest.display} ⚠️`);
+                        document.getElementById('check-standalone').textContent = '✗';
+                        document.getElementById('check-standalone').className = 'check-icon check-fail';
+                    }
+
+                    const has192 = manifest.icons && manifest.icons.some(i => i.sizes.includes('192'));
+                    const has512 = manifest.icons && manifest.icons.some(i => i.sizes.includes('512'));
+
+                    if (has192 && has512) {
+                        checks.push('Ícones: 192x192 e 512x512 ✅');
+                        document.getElementById('check-icons').textContent = '✓';
+                        document.getElementById('check-icons').className = 'check-icon check-pass';
+                    } else {
+                        checks.push(`Ícones: ${has192 ? '192 ✅' : '192 ❌'} / ${has512 ? '512 ✅' : '512 ❌'}`);
+                        document.getElementById('check-icons').textContent = '✗';
+                        document.getElementById('check-icons').className = 'check-icon check-fail';
+                    }
+
+                    manifestStatus.className = 'status-box status-ok';
+                    manifestText.innerHTML = checks.join('<br>');
+                } else {
+                    manifestStatus.className = 'status-box status-error';
+                    manifestText.textContent = 'Não encontrado ❌';
+                }
+            } catch (e) {
+                manifestStatus.className = 'status-box status-error';
+                manifestText.textContent = 'Erro ao carregar ❌';
+            }
+        }
+
+        // Verificar Service Worker
+        function checkSW() {
+            const swStatus = document.getElementById('sw-status');
+            const swText = document.getElementById('sw-text');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration) {
+                        swStatus.className = 'status-box status-ok';
+                        swText.textContent = 'Registrado ✅ (Ativo)';
+                    } else {
+                        swStatus.className = 'status-box status-warning';
+                        swText.textContent = 'Não registrado ⚠️ (Instalação ainda possível)';
+                    }
+                });
+            } else {
+                swStatus.className = 'status-box status-error';
+                swText.textContent = 'Não suportado ❌';
+            }
+        }
+
+        // Verificar se é instalável
+        function checkInstallable() {
+            const installStatus = document.getElementById('install-status');
+            const installText = document.getElementById('install-text');
+
+            // Verificar se já está instalado
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                installStatus.className = 'status-box status-ok';
+                installText.textContent = 'App já instalado! ✅ (Rodando como standalone)';
+                return;
+            }
+
+            // Verificar se beforeinstallprompt é suportado
+            if ('BeforeInstallPromptEvent' in window) {
+                installStatus.className = 'status-box status-ok';
+                installText.textContent = 'Pronto para instalação ✅';
+            } else {
+                installStatus.className = 'status-box status-warning';
+                installText.textContent = 'Instalação manual necessária ⚠️ (Use "Adicionar à tela inicial")';
+            }
+        }
+
+        // Executar verificações
+        detectBrowser();
+        checkHTTPS();
+        checkManifest();
+        checkSW();
+        checkInstallable();
+    </script>
+</body>
+</html>

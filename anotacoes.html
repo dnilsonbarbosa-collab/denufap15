@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <!-- PWA Meta Tags Otimizadas -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Anotações">
+    <meta name="application-name" content="Anotações">
+    <meta name="msapplication-TileColor" content="#1a237e">
+    <meta name="msapplication-navbutton-color" content="#1a237e">
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: dark)">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <link rel="manifest" href="./manifest.json">
+
+    <meta name="theme-color" content="#1a237e">
+    <meta name="msapplication-TileColor" content="#1a237e">
+    <meta name="msapplication-navbutton-color" content="#1a237e">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Anotações">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Anotações">
+
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-180x180.png">
+
+    <title>Sistema de Anotações</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #1a237e;
+            --primary-light: #3949ab;
+            --accent: #ff4081;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --info: #2196f3;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #212121;
+            --text-secondary: #757575;
+            --border: #e0e0e0;
+            --sidebar-width: 280px;
+            --max-content-width: 1400px;
+        }
+
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            overscroll-behavior: none;
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                flex-direction: row;
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px 20px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            box-shadow: 0 4px 20px rgba(26, 35, 126, 0.3);
+            z-index: 100;
+            flex-shrink: 0;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+        }
+
+        @media (min-width: 1024px) {
+            .header {
+                width: var(--sidebar-width);
+                height: 100vh;
+                height: 100dvh;
+                display: flex;
+                flex-direction: column;
+                padding: 24px;
+                padding-top: max(24px, env(safe-area-inset-top));
+                position: fixed;
+                left: 0;
+                top: 0;
+            }
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        @media (min-width: 1024px) {
+            .header-top {
+                flex-direction: column;
+                text-align: center;
+                margin-bottom: 24px;
+            }
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        @media (min-width: 1024px) {
+            .back-btn {
+                width: 100%;
+                border-radius: 12px;
+                justify-content: flex-start;
+                padding: 0 16px;
+                gap: 12px;
+            }
+
+            .back-btn::after {
+                content: 'Voltar ao Início';
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        @media (min-width: 1024px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 1024px) {
+            .header-actions {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+
+        .btn-icon {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        @media (min-width: 1024px) {
+            .btn-icon {
+                width: 100%;
+                height: auto;
+                padding: 12px 16px;
+                border-radius: 12px;
+                justify-content: flex-start;
+                gap: 12px;
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+
+            .btn-icon::after {
+                content: attr(title);
+            }
+        }
+
+        .btn-icon:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px;
+            padding-bottom: max(80px, env(safe-area-inset-bottom) + 80px);
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+        }
+
+        @media (min-width: 1024px) {
+            .content {
+                margin-left: var(--sidebar-width);
+                padding: 32px;
+                max-width: calc(var(--max-content-width) - var(--sidebar-width));
+                padding-bottom: 32px;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .content {
+                max-width: calc(100% - var(--sidebar-width));
+                padding: 40px;
+            }
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            .filters {
+                flex-wrap: wrap;
+                overflow-x: visible;
+                gap: 12px;
+            }
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            background: white;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        @media (min-width: 1024px) {
+            .filter-chip {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .filter-chip.has-selection {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .search-container {
+                flex-direction: row;
+                gap: 16px;
+            }
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: white;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .search-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cards-container {
+            display: grid;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .cards-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 1024px) {
+            .card {
+                padding: 20px;
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card.abonada {
+            border-left-color: var(--info);
+        }
+
+        .card.justificada {
+            border-left-color: var(--success);
+        }
+
+        .card.punicao-pendente {
+            border-left-color: var(--warning);
+        }
+
+        .card.punicao-cumprida {
+            border-left-color: var(--success);
+            opacity: 0.9;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .soldado-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .turma-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        @media (min-width: 1024px) {
+            .turma-badge {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+
+        .nome-guerra {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        @media (min-width: 1024px) {
+            .nome-guerra {
+                font-size: 1.2rem;
+            }
+        }
+
+        .numero {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .status-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @media (min-width: 1024px) {
+            .status-badge {
+                font-size: 0.8rem;
+                padding: 8px 14px;
+            }
+        }
+
+        .status-badge.abonada {
+            background: #e3f2fd;
+            color: var(--info);
+        }
+
+        .status-badge.justificada {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+
+        .status-badge.punicao {
+            background: #fff3e0;
+            color: var(--warning);
+        }
+
+        .status-badge.punicao.cumprida {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+
+        .sub-status {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        @media (min-width: 1024px) {
+            .sub-status {
+                font-size: 0.75rem;
+            }
+        }
+
+        .sub-status.pendente {
+            background: #fff3e0;
+            color: var(--warning);
+        }
+
+        .sub-status.cumprida {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+
+        .card-body {
+            margin-bottom: 12px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            gap: 10px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 1024px) {
+            .info-label {
+                font-size: 0.85rem;
+            }
+        }
+
+        .info-value {
+            font-size: 0.85rem;
+            color: var(--text);
+            font-weight: 600;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        @media (min-width: 1024px) {
+            .info-value {
+                font-size: 0.9rem;
+            }
+        }
+
+        .motivo {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        @media (min-width: 1024px) {
+            .motivo {
+                padding: 14px;
+                font-size: 0.95rem;
+            }
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        @media (min-width: 1024px) {
+            .btn-small {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .btn-edit {
+            background: #e3f2fd;
+            color: var(--primary);
+        }
+
+        .btn-edit:hover {
+            background: #bbdefb;
+        }
+
+        .btn-delete {
+            background: #ffebee;
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background: #ffcdd2;
+        }
+
+        .btn-small:active {
+            transform: scale(0.95);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            display: flex;
+            align-items: flex-end;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--card);
+            width: 100%;
+            max-height: 90vh;
+            max-height: 90dvh;
+            border-radius: 24px 24px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                max-width: 600px;
+                margin: 0 auto;
+                border-radius: 24px;
+                max-height: 85vh;
+            }
+
+            .modal-overlay {
+                align-items: center;
+                padding: 20px;
+            }
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .radio-option.selected {
+            border-color: var(--primary);
+            background: #e8eaf6;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: var(--primary);
+        }
+
+        .sub-options {
+            margin-left: 32px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .sub-options.show {
+            display: block;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid var(--border);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            flex: 1;
+            background: linear-gradient(135deg, var(--success) 0%, #388e3c 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: max(24px, env(safe-area-inset-bottom));
+            right: max(24px, env(safe-area-inset-right));
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent) 0%, #f50057 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 6px 20px rgba(255, 64, 129, 0.4);
+            cursor: pointer;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 1024px) {
+            .fab {
+                width: auto;
+                height: auto;
+                padding: 16px 32px;
+                border-radius: 50px;
+                font-size: 1rem;
+                font-weight: 600;
+                gap: 8px;
+            }
+
+            .fab::after {
+                content: 'Nova Anotação';
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        /* Estilos para modais de PDF */
+        .pdf-filter-group {
+            margin-bottom: 20px;
+        }
+
+        .pdf-filter-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pdf-filter-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: white;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23757575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 48px;
+        }
+
+        .pdf-filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .pdf-filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .pdf-filters-applied {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+
+        .pdf-filters-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .pdf-filters-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pdf-filter-tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .pdf-filter-tag.empty {
+            color: var(--text-secondary);
+            font-style: italic;
+            border-style: dashed;
+        }
+
+        /* Botão de instalação PWA */
+        .install-btn {
+            position: fixed;
+            bottom: max(100px, env(safe-area-inset-bottom) + 100px);
+            left: 50%;
+            transform: translateX(-50%) translateY(200px);
+            background: linear-gradient(135deg, var(--success) 0%, #388e3c 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .install-btn.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .install-btn:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+        }
+
+        /* Modal de seleção de tipo de relatório */
+        .report-type-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .report-type-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .report-type-card:hover {
+            border-color: var(--primary);
+            background: #f5f5f5;
+        }
+
+        .report-type-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .report-type-card .title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .report-type-card .desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Estatísticas no modal */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-box .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Lista de estatísticas detalhadas */
+        .stats-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .stats-item .name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .stats-item .count {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .stats-item .types {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top">
+            <a href="./index.html" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <h1>Anotações</h1>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-icon" onclick="openReportTypeModal()" title="Relatórios PDF">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+            </button>
+            <button class="btn-icon" onclick="exportData()" title="Exportar Dados">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                </svg>
+            </button>
+            <button class="btn-icon" onclick="importData()" title="Importar Dados">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                </svg>
+            </button>
+            <button class="btn-icon" onclick="clearAll()" title="Limpar Tudo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-abonadas">0</div>
+                <div class="stat-label">Abonadas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-justificadas">0</div>
+                <div class="stat-label">Justificadas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-punicoes">0</div>
+                <div class="stat-label">Punições</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-chip active" onclick="filterStatus('todos')">Todos</button>
+            <button class="filter-chip" onclick="filterStatus('abonada')">Abonadas</button>
+            <button class="filter-chip" onclick="filterStatus('justificada')">Justificadas</button>
+            <button class="filter-chip" onclick="filterStatus('punicao')">Punições</button>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <div class="search-label">Buscar por Anotado</div>
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="search-input" id="search-anotado" placeholder="Nome ou número..." oninput="renderAnotacoes()">
+            </div>
+            <div class="search-box">
+                <div class="search-label">Buscar por Anotador</div>
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="search-input" id="search-anotador" placeholder="Nome do anotador..." oninput="renderAnotacoes()">
+            </div>
+        </div>
+
+        <div class="cards-container" id="lista-anotacoes"></div>
+    </main>
+
+    <button class="fab" onclick="openModal()">+</button>
+
+    <button class="install-btn" id="install-btn" onclick="installApp()">
+        <span>📲</span>
+        <span>Instalar App</span>
+    </button>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Nova Anotação</h2>
+                <button class="btn-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="form-anotacao">
+                    <input type="hidden" id="id">
+
+                    <div class="form-group">
+                        <label class="form-label">Turma *</label>
+                        <select class="form-select" id="turma" required>
+                            <option value="">Selecione...</option>
+                            <option value="CFAP">CFAP</option>
+                            <option value="NUFAP 2">NUFAP 2</option>
+                            <option value="NUFAP 3">NUFAP 3</option>
+                            <option value="NUFAP 4">NUFAP 4</option>
+                            <option value="NUFAP 6">NUFAP 6</option>
+                            <option value="NUFAP 11">NUFAP 11</option>
+                            <option value="NUFAP 14">NUFAP 14</option>
+                            <option value="NUFAP 15">NUFAP 15</option>
+                            <option value="NUFAP 22">NUFAP 22</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Número *</label>
+                        <input type="number" class="form-input" id="numero" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nome de Guerra *</label>
+                        <input type="text" class="form-input" id="nome-guerra" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Data *</label>
+                        <input type="date" class="form-input" id="data" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Anotador</label>
+                        <input type="text" class="form-input" id="anotador">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Norma 25</label>
+                        <input type="text" class="form-input" id="norma">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Grau</label>
+                        <select class="form-select" id="grau">
+                            <option value="LEVE">LEVE (L)</option>
+                            <option value="MÉDIA">MÉDIA (M)</option>
+                            <option value="GRAVE">GRAVE (G)</option>
+                            <option value="GRAVÍSSIMA">GRAVÍSSIMA (GA)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Motivo *</label>
+                        <textarea class="form-textarea" id="motivo" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Situação *</label>
+                        <div class="radio-group">
+                            <label class="radio-option" onclick="selectSituacao('abonada')">
+                                <input type="radio" name="situacao" value="abonada">
+                                <span>Abonada</span>
+                            </label>
+                            <label class="radio-option" onclick="selectSituacao('justificada')">
+                                <input type="radio" name="situacao" value="justificada">
+                                <span>Justificada</span>
+                            </label>
+                            <label class="radio-option" onclick="selectSituacao('punicao')">
+                                <input type="radio" name="situacao" value="punicao">
+                                <span>Punição</span>
+                            </label>
+                        </div>
+
+                        <div class="sub-options" id="sub-punicao">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="sub-status">
+                                <option value="pendente">Pendente</option>
+                                <option value="cumprida">Cumprida</option>
+                            </select>
+                            <label class="form-label" style="margin-top:10px">Tipo</label>
+                            <input type="text" class="form-input" id="tipo-punicao" placeholder="Ex: RR, ID, TEHM">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button type="button" class="btn-primary" onclick="saveAnotacao()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Seleção de Tipo de Relatório -->
+    <div class="modal-overlay" id="report-type-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">📊 Selecionar Tipo de Relatório</h2>
+                <button class="btn-close" onclick="closeReportTypeModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="report-type-grid">
+                    <div class="report-type-card" onclick="openPdfModal()">
+                        <div class="icon">📄</div>
+                        <div class="title">Relatório Completo</div>
+                        <div class="desc">Lista todas as anotações com todos os dados detalhados</div>
+                    </div>
+                    <div class="report-type-card" onclick="openStatsModal()">
+                        <div class="icon">📈</div>
+                        <div class="title">Relatório Estatístico</div>
+                        <div class="desc">Estatísticas por anotador, anotado e normas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros do PDF (Relatório Completo) -->
+    <div class="modal-overlay" id="pdf-filter-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">📄 Filtros do Relatório Completo</h2>
+                <button class="btn-close" onclick="closePdfFilterModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="pdf-filter-group">
+                    <label class="pdf-filter-label">Anotado (Nome de Guerra)</label>
+                    <select class="pdf-filter-select" id="pdf-filter-anotado">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="pdf-filter-group">
+                    <label class="pdf-filter-label">Anotador</label>
+                    <select class="pdf-filter-select" id="pdf-filter-anotador">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="pdf-filter-group">
+                    <label class="pdf-filter-label">Turma</label>
+                    <select class="pdf-filter-select" id="pdf-filter-turma">
+                        <option value="">Todas</option>
+                        <option value="CFAP">CFAP</option>
+                        <option value="NUFAP 2">NUFAP 2</option>
+                        <option value="NUFAP 3">NUFAP 3</option>
+                        <option value="NUFAP 4">NUFAP 4</option>
+                        <option value="NUFAP 6">NUFAP 6</option>
+                        <option value="NUFAP 11">NUFAP 11</option>
+                        <option value="NUFAP 14">NUFAP 14</option>
+                        <option value="NUFAP 15">NUFAP 15</option>
+                        <option value="NUFAP 22">NUFAP 22</option>
+                    </select>
+                </div>
+
+                <div class="pdf-filter-group">
+                    <label class="pdf-filter-label">Período (Opcional)</label>
+                    <div class="pdf-filter-row">
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; display: block;">Data Início</label>
+                            <input type="date" class="form-input" id="pdf-filter-data-inicio" style="padding: 12px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; display: block;">Data Fim</label>
+                            <input type="date" class="form-input" id="pdf-filter-data-fim" style="padding: 12px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pdf-filters-applied">
+                    <div class="pdf-filters-title">Filtros aplicados no PDF:</div>
+                    <div class="pdf-filters-list" id="pdf-filters-preview">
+                        <span class="pdf-filter-tag empty">Nenhum filtro selecionado</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closePdfFilterModal()">Cancelar</button>
+                <button type="button" class="btn-primary" onclick="generatePdfWithFilters()">Gerar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Estatísticas -->
+    <div class="modal-overlay" id="stats-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">📊 Relatório Estatístico</h2>
+                <button class="btn-close" onclick="closeStatsModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Estatísticas Gerais -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="number" id="stats-total-anotacoes">0</div>
+                        <div class="label">Total Anotações</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="stats-total-anotadores">0</div>
+                        <div class="label">Anotadores</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="stats-total-anotados">0</div>
+                        <div class="label">Anotados</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="stats-total-normas">0</div>
+                        <div class="label">Normas Usadas</div>
+                    </div>
+                </div>
+
+                <!-- Abas de estatísticas -->
+                <div class="filters" style="margin-top: 24px;">
+                    <button class="filter-chip active" onclick="showStatsTab('anotadores')">Por Anotador</button>
+                    <button class="filter-chip" onclick="showStatsTab('anotados')">Por Anotado</button>
+                    <button class="filter-chip" onclick="showStatsTab('normas')">Por Norma</button>
+                </div>
+
+                <!-- Lista de Anotadores -->
+                <div id="stats-anotadores-list" class="stats-list">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+
+                <!-- Lista de Anotados -->
+                <div id="stats-anotados-list" class="stats-list" style="display: none;">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+
+                <!-- Lista de Normas -->
+                <div id="stats-normas-list" class="stats-list" style="display: none;">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeStatsModal()">Fechar</button>
+                <button type="button" class="btn-success" onclick="generateStatsPDF()">📄 Exportar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ==================== VARIÁVEIS GLOBAIS ====================
+        let anotacoes = JSON.parse(localStorage.getItem('anotacoes')) || [];
+        let filtroAtual = 'todos';
+        let editandoId = null;
+        let situacaoSelecionada = null;
+        let deferredPrompt = null;
+        let statsTabAtual = 'anotadores';
+
+        // ==================== INICIALIZAÇÃO ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAnotacoes();
+            updateStats();
+            document.getElementById('data').value = new Date().toISOString().split('T')[0];
+
+            // Registrar Service Worker para PWA
+            registerServiceWorker();
+
+            // Capturar evento beforeinstallprompt
+            captureInstallPrompt();
+
+            // Event listeners para filtros do PDF
+            setupPdfFilterListeners();
+        });
+
+        // ==================== PWA - SERVICE WORKER ====================
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('[PWA] Service Worker registrado:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('[PWA] Falha no registro do SW:', error);
+                    });
+            }
+        }
+
+        // ==================== PWA - CAPTURAR PROMPT DE INSTALAÇÃO ====================
+        function captureInstallPrompt() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevenir o comportamento padrão
+                e.preventDefault();
+                // Salvar o evento para usar depois
+                deferredPrompt = e;
+                // Mostrar botão de instalação
+                const installBtn = document.getElementById('install-btn');
+                if (installBtn) {
+                    installBtn.classList.add('show');
+                }
+                console.log('[PWA] App pronto para instalação');
+            });
+
+            // Detectar quando o app foi instalado
+            window.addEventListener('appinstalled', () => {
+                console.log('[PWA] App instalado com sucesso!');
+                const installBtn = document.getElementById('install-btn');
+                if (installBtn) {
+                    installBtn.classList.remove('show');
+                }
+                deferredPrompt = null;
+                showToast('✅ App instalado com sucesso!');
+            });
+        }
+
+        // ==================== FUNÇÃO DE INSTALAÇÃO ====================
+        async function installApp() {
+            if (!deferredPrompt) {
+                showToast('O app já está instalado ou não é instalável neste dispositivo');
+                return;
+            }
+
+            // Mostrar o prompt de instalação
+            deferredPrompt.prompt();
+
+            // Aguardar resposta do usuário
+            const { outcome } = await deferredPrompt.userChoice;
+
+            if (outcome === 'accepted') {
+                console.log('[PWA] Usuário aceitou a instalação');
+            } else {
+                console.log('[PWA] Usuário recusou a instalação');
+            }
+
+            // Limpar o evento salvo
+            deferredPrompt = null;
+        }
+
+        // ==================== FUNÇÕES DE BUSCA E FILTRO ====================
+        function searchAnotado() {
+            renderAnotacoes();
+        }
+
+        function searchAnotador() {
+            renderAnotacoes();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').textContent = anotacoes.length;
+            document.getElementById('stat-abonadas').textContent = anotacoes.filter(a => a.situacao === 'abonada').length;
+            document.getElementById('stat-justificadas').textContent = anotacoes.filter(a => a.situacao === 'justificada').length;
+            document.getElementById('stat-punicoes').textContent = anotacoes.filter(a => a.situacao === 'punicao').length;
+        }
+
+        function renderAnotacoes() {
+            const container = document.getElementById('lista-anotacoes');
+            let filtradas = anotacoes;
+
+            if (filtroAtual !== 'todos') {
+                filtradas = anotacoes.filter(a => a.situacao === filtroAtual);
+            }
+
+            // Filtro por anotado (nome ou número)
+            const searchAnotadoTerm = document.getElementById('search-anotado').value.toLowerCase().trim();
+            if (searchAnotadoTerm) {
+                filtradas = filtradas.filter(a => 
+                    a.nomeGuerra.toLowerCase().includes(searchAnotadoTerm) || 
+                    a.numero.toString().includes(searchAnotadoTerm)
+                );
+            }
+
+            // Filtro por anotador
+            const searchAnotadorTerm = document.getElementById('search-anotador').value.toLowerCase().trim();
+            if (searchAnotadorTerm) {
+                filtradas = filtradas.filter(a => 
+                    a.anotador && a.anotador.toLowerCase().includes(searchAnotadorTerm)
+                );
+            }
+
+            filtradas.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            if (filtradas.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Nenhuma anotação encontrada</div></div>';
+                return;
+            }
+
+            container.innerHTML = filtradas.map(a => {
+                let cardClass = a.situacao;
+                let statusText = '';
+                let subStatusText = '';
+
+                if (a.situacao === 'abonada') statusText = 'ABONADA';
+                else if (a.situacao === 'justificada') statusText = 'JUSTIFICADA';
+                else if (a.situacao === 'punicao') {
+                    statusText = 'PUNIÇÃO';
+                    subStatusText = a.subStatus === 'cumprida' ? ' - CUMPRIDA' : ' - PENDENTE';
+                    cardClass += a.subStatus === 'pendente' ? ' punicao-pendente' : ' punicao-cumprida';
+                }
+
+                return `
+                    <div class="card ${cardClass}">
+                        <div class="card-header">
+                            <div class="soldado-info">
+                                <span class="turma-badge">${a.turma}</span>
+                                <div class="nome-guerra">${a.nomeGuerra}</div>
+                                <div class="numero">Nº ${a.numero}</div>
+                            </div>
+                            <div class="status-section">
+                                <span class="status-badge ${a.situacao} ${a.subStatus === 'cumprida' ? 'cumprida' : ''}">${statusText}${subStatusText}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <span class="info-label">Data</span>
+                                <span class="info-value">${formatDate(a.data)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Anotador</span>
+                                <span class="info-value">${a.anotador || '-'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Norma</span>
+                                <span class="info-value">${a.norma || '-'} (${a.grau || '-'})</span>
+                            </div>
+                            ${a.tipoPunicao ? `<div class="info-row"><span class="info-label">Tipo Punição</span><span class="info-value">${a.tipoPunicao}</span></div>` : ''}
+                            <div class="motivo"><strong>Motivo:</strong> ${a.motivo}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-small btn-edit" onclick="editAnotacao('${a.id}')">✏️ Editar</button>
+                            <button class="btn-small btn-delete" onclick="deleteAnotacao('${a.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openModal(id = null) {
+            editandoId = id;
+            document.getElementById('modal-title').textContent = id ? 'Editar Anotação' : 'Nova Anotação';
+
+            if (id) {
+                const a = anotacoes.find(x => x.id === id);
+                document.getElementById('turma').value = a.turma;
+                document.getElementById('numero').value = a.numero;
+                document.getElementById('nome-guerra').value = a.nomeGuerra;
+                document.getElementById('data').value = a.data;
+                document.getElementById('anotador').value = a.anotador || '';
+                document.getElementById('norma').value = a.norma || '';
+                document.getElementById('grau').value = a.grau || 'LEVE';
+                document.getElementById('motivo').value = a.motivo;
+                selectSituacao(a.situacao);
+                if (a.situacao === 'punicao') {
+                    document.getElementById('sub-status').value = a.subStatus || 'pendente';
+                    document.getElementById('tipo-punicao').value = a.tipoPunicao || '';
+                }
+            } else {
+                document.getElementById('form-anotacao').reset();
+                document.getElementById('data').value = new Date().toISOString().split('T')[0];
+                document.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+                document.getElementById('sub-punicao').classList.remove('show');
+                situacaoSelecionada = null;
+            }
+
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            editandoId = null;
+        }
+
+        function selectSituacao(situacao) {
+            situacaoSelecionada = situacao;
+            document.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            const subPunicao = document.getElementById('sub-punicao');
+            if (situacao === 'punicao') {
+                subPunicao.classList.add('show');
+            } else {
+                subPunicao.classList.remove('show');
+            }
+        }
+
+        function saveAnotacao() {
+            const turma = document.getElementById('turma').value;
+            const numero = document.getElementById('numero').value;
+            const nomeGuerra = document.getElementById('nome-guerra').value;
+            const data = document.getElementById('data').value;
+            const motivo = document.getElementById('motivo').value;
+
+            if (!turma || !numero || !nomeGuerra || !data || !motivo || !situacaoSelecionada) {
+                showToast('Preencha todos os campos obrigatórios');
+                return;
+            }
+
+            const anotacao = {
+                id: editandoId || Date.now().toString(),
+                turma,
+                numero,
+                nomeGuerra: nomeGuerra.toUpperCase(),
+                data,
+                anotador: document.getElementById('anotador').value,
+                norma: document.getElementById('norma').value,
+                grau: document.getElementById('grau').value,
+                motivo,
+                situacao: situacaoSelecionada,
+                subStatus: situacaoSelecionada === 'punicao' ? document.getElementById('sub-status').value : null,
+                tipoPunicao: situacaoSelecionada === 'punicao' ? document.getElementById('tipo-punicao').value : null
+            };
+
+            if (editandoId) {
+                const index = anotacoes.findIndex(a => a.id === editandoId);
+                anotacoes[index] = anotacao;
+                showToast('Anotação atualizada!');
+            } else {
+                anotacoes.unshift(anotacao);
+                showToast('Anotação adicionada!');
+            }
+
+            localStorage.setItem('anotacoes', JSON.stringify(anotacoes));
+            renderAnotacoes();
+            updateStats();
+            closeModal();
+        }
+
+        function editAnotacao(id) {
+            openModal(id);
+        }
+
+        function deleteAnotacao(id) {
+            if (confirm('Excluir esta anotação?')) {
+                anotacoes = anotacoes.filter(a => a.id !== id);
+                localStorage.setItem('anotacoes', JSON.stringify(anotacoes));
+                renderAnotacoes();
+                updateStats();
+                showToast('Anotação excluída');
+            }
+        }
+
+        function filterStatus(status) {
+            filtroAtual = status;
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            event.target.classList.add('active');
+            renderAnotacoes();
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const [ano, mes, dia] = dateStr.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(anotacoes, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `anotacoes_backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast('Dados exportados!');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const dados = JSON.parse(event.target.result);
+                        if (confirm(`Importar ${dados.length} anotações?`)) {
+                            anotacoes = dados;
+                            localStorage.setItem('anotacoes', JSON.stringify(anotacoes));
+                            renderAnotacoes();
+                            updateStats();
+                            showToast('Dados importados!');
+                        }
+                    } catch (err) {
+                        showToast('Erro ao importar');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function clearAll() {
+            if (anotacoes.length === 0) return;
+            if (confirm('ATENÇÃO: Apagar TODAS as anotações?')) {
+                if (confirm('Confirmação final: Deseja realmente excluir todos os dados?')) {
+                    anotacoes = [];
+                    localStorage.removeItem('anotacoes');
+                    renderAnotacoes();
+                    updateStats();
+                    showToast('Todos os dados apagados');
+                }
+            }
+        }
+
+        // ==================== MODAIS DE RELATÓRIO ====================
+        function openReportTypeModal() {
+            document.getElementById('report-type-modal').classList.add('active');
+        }
+
+        function closeReportTypeModal() {
+            document.getElementById('report-type-modal').classList.remove('active');
+        }
+
+        // ==================== RELATÓRIO COMPLETO (PDF) ====================
+        function openPdfModal() {
+            closeReportTypeModal();
+            if (anotacoes.length === 0) {
+                showToast('Não há anotações para exportar');
+                return;
+            }
+
+            populatePdfFilters();
+            document.getElementById('pdf-filter-modal').classList.add('active');
+            updatePdfFiltersPreview();
+        }
+
+        function closePdfFilterModal() {
+            document.getElementById('pdf-filter-modal').classList.remove('active');
+        }
+
+        function populatePdfFilters() {
+            // Preencher anotados únicos
+            const anotados = [...new Set(anotacoes.map(a => a.nomeGuerra))].sort();
+            const selectAnotado = document.getElementById('pdf-filter-anotado');
+            selectAnotado.innerHTML = '<option value="">Todos</option>' + 
+                anotados.map(nome => `<option value="${nome}">${nome}</option>`).join('');
+
+            // Preencher anotadores únicos
+            const anotadores = [...new Set(anotacoes.filter(a => a.anotador).map(a => a.anotador))].sort();
+            const selectAnotador = document.getElementById('pdf-filter-anotador');
+            selectAnotador.innerHTML = '<option value="">Todos</option>' + 
+                anotadores.map(nome => `<option value="${nome}">${nome}</option>`).join('');
+        }
+
+        function setupPdfFilterListeners() {
+            ['pdf-filter-anotado', 'pdf-filter-anotador', 'pdf-filter-turma', 'pdf-filter-data-inicio', 'pdf-filter-data-fim']
+                .forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('change', updatePdfFiltersPreview);
+                });
+        }
+
+        function updatePdfFiltersPreview() {
+            const anotado = document.getElementById('pdf-filter-anotado').value;
+            const anotador = document.getElementById('pdf-filter-anotador').value;
+            const turma = document.getElementById('pdf-filter-turma').value;
+            const dataInicio = document.getElementById('pdf-filter-data-inicio').value;
+            const dataFim = document.getElementById('pdf-filter-data-fim').value;
+
+            const container = document.getElementById('pdf-filters-preview');
+            let html = '';
+
+            if (!anotado && !anotador && !turma && !dataInicio && !dataFim) {
+                html = '<span class="pdf-filter-tag empty">Nenhum filtro selecionado</span>';
+            } else {
+                if (anotado) html += `<span class="pdf-filter-tag">Anotado: ${anotado}</span>`;
+                if (anotador) html += `<span class="pdf-filter-tag">Anotador: ${anotador}</span>`;
+                if (turma) html += `<span class="pdf-filter-tag">Turma: ${turma}</span>`;
+                if (dataInicio) html += `<span class="pdf-filter-tag">De: ${formatDate(dataInicio)}</span>`;
+                if (dataFim) html += `<span class="pdf-filter-tag">Até: ${formatDate(dataFim)}</span>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function generatePdfWithFilters() {
+            const anotado = document.getElementById('pdf-filter-anotado').value;
+            const anotador = document.getElementById('pdf-filter-anotador').value;
+            const turma = document.getElementById('pdf-filter-turma').value;
+            const dataInicio = document.getElementById('pdf-filter-data-inicio').value;
+            const dataFim = document.getElementById('pdf-filter-data-fim').value;
+
+            closePdfFilterModal();
+
+            // Aplicar filtros
+            let filtradas = [...anotacoes];
+
+            if (anotado) filtradas = filtradas.filter(a => a.nomeGuerra === anotado);
+            if (anotador) filtradas = filtradas.filter(a => a.anotador === anotador);
+            if (turma) filtradas = filtradas.filter(a => a.turma === turma);
+            if (dataInicio) filtradas = filtradas.filter(a => a.data >= dataInicio);
+            if (dataFim) filtradas = filtradas.filter(a => a.data <= dataFim);
+
+            if (filtradas.length === 0) {
+                showToast('Nenhuma anotação encontrada com os filtros selecionados');
+                return;
+            }
+
+            generateCompletePDF(filtradas, { anotado, anotador, turma, dataInicio, dataFim });
+        }
+
+        // ==================== GERAR PDF COMPLETO COM TODOS OS DADOS ====================
+        function generateCompletePDF(filtradas, filtros) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+            const sessaoUsuario = JSON.parse(localStorage.getItem('sessaoUsuario') || '{}');
+            const unidadeUsuario = sessaoUsuario.unidade || 'Unidade';
+
+            // Cabeçalho
+            doc.setFillColor(26, 35, 126);
+            doc.rect(0, 0, doc.internal.pageSize.getWidth(), 35, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RELATÓRIO COMPLETO DE ANOTAÇÕES', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text(unidadeUsuario + ' | Gerado em: ' + new Date().toLocaleDateString('pt-BR'), doc.internal.pageSize.getWidth() / 2, 23, { align: 'center' });
+
+            // Filtros aplicados
+            let filtrosTexto = [];
+            if (filtros.anotado) filtrosTexto.push(`Anotado: ${filtros.anotado}`);
+            if (filtros.anotador) filtrosTexto.push(`Anotador: ${filtros.anotador}`);
+            if (filtros.turma) filtrosTexto.push(`Turma: ${filtros.turma}`);
+            if (filtros.dataInicio || filtros.dataFim) {
+                const periodo = `Período: ${filtros.dataInicio ? formatDate(filtros.dataInicio) : 'Início'} até ${filtros.dataFim ? formatDate(filtros.dataFim) : 'Atual'}`;
+                filtrosTexto.push(periodo);
+            }
+
+            if (filtrosTexto.length > 0) {
+                doc.setFontSize(9);
+                doc.text(`Filtros: ${filtrosTexto.join(' | ')}`, doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
+            }
+
+            // Tabela com TODOS os dados
+            const headers = [['TURMA', 'Nº', 'NOME', 'DATA', 'ANOTADOR', 'NORMA', 'GRAU', 'SITUAÇÃO', 'TIPO PUNIÇÃO', 'MOTIVO']];
+
+            const data = filtradas.sort((a, b) => new Date(b.data) - new Date(a.data)).map(a => {
+                let situacao = a.situacao.toUpperCase();
+                if (a.situacao === 'punicao' && a.subStatus) {
+                    situacao += ` (${a.subStatus.toUpperCase()})`;
+                }
+
+                return [
+                    a.turma,
+                    a.numero,
+                    a.nomeGuerra,
+                    formatDate(a.data),
+                    a.anotador || '-',
+                    a.norma || '-',
+                    a.grau || '-',
+                    situacao,
+                    a.tipoPunicao || '-',
+                    a.motivo
+                ];
+            });
+
+            doc.autoTable({
+                head: headers,
+                body: data,
+                startY: filtrosTexto.length > 0 ? 38 : 38,
+                margin: { left: 5, right: 5 },
+                styles: { 
+                    fontSize: 8, 
+                    cellPadding: 3,
+                    overflow: 'linebreak',
+                    cellWidth: 'wrap'
+                },
+                headStyles: { 
+                    fillColor: [26, 35, 126], 
+                    textColor: 255, 
+                    fontStyle: 'bold',
+                    fontSize: 9
+                },
+                bodyStyles: { 
+                    textColor: 33,
+                    fontSize: 8
+                },
+                alternateRowStyles: { fillColor: [250, 250, 250] },
+                columnStyles: {
+                    0: { cellWidth: 20 },
+                    1: { cellWidth: 12 },
+                    2: { cellWidth: 30 },
+                    3: { cellWidth: 20 },
+                    4: { cellWidth: 30 },
+                    5: { cellWidth: 20 },
+                    6: { cellWidth: 18 },
+                    7: { cellWidth: 28 },
+                    8: { cellWidth: 22 },
+                    9: { cellWidth: 'auto' }
+                },
+                didDrawCell: (data) => {
+                    if (data.section === 'body') {
+                        const situacao = data.row.raw[7];
+                        if (situacao.includes('PUNIÇÃO')) {
+                            if (situacao.includes('PENDENTE')) {
+                                data.cell.styles.textColor = [255, 152, 0];
+                                data.cell.styles.fontStyle = 'bold';
+                            } else if (situacao.includes('CUMPRIDA')) {
+                                data.cell.styles.textColor = [76, 175, 80];
+                            }
+                        } else if (situacao === 'ABONADA') {
+                            data.cell.styles.textColor = [33, 150, 243];
+                        } else if (situacao === 'JUSTIFICADA') {
+                            data.cell.styles.textColor = [76, 175, 80];
+                        }
+                    }
+                }
+            });
+
+            // Resumo no final
+            const finalY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Total de anotações no relatório: ${filtradas.length}`, doc.internal.pageSize.getWidth() / 2, finalY, { align: 'center' });
+
+            doc.save(`relatorio_completo_anotacoes_${new Date().toISOString().split('T')[0]}.pdf`);
+            showToast('PDF completo gerado com sucesso!');
+        }
+
+        // ==================== RELATÓRIO ESTATÍSTICO ====================
+        function openStatsModal() {
+            closeReportTypeModal();
+            if (anotacoes.length === 0) {
+                showToast('Não há anotações para gerar estatísticas');
+                return;
+            }
+
+            calcularEstatisticas();
+            document.getElementById('stats-modal').classList.add('active');
+        }
+
+        function closeStatsModal() {
+            document.getElementById('stats-modal').classList.remove('active');
+        }
+
+        function calcularEstatisticas() {
+            // Estatísticas gerais
+            document.getElementById('stats-total-anotacoes').textContent = anotacoes.length;
+
+            const anotadoresUnicos = new Set(anotacoes.filter(a => a.anotador).map(a => a.anotador));
+            document.getElementById('stats-total-anotadores').textContent = anotadoresUnicos.size;
+
+            const anotadosUnicos = new Set(anotacoes.map(a => a.nomeGuerra));
+            document.getElementById('stats-total-anotados').textContent = anotadosUnicos.size;
+
+            const normasUnicas = new Set(anotacoes.filter(a => a.norma).map(a => a.norma));
+            document.getElementById('stats-total-normas').textContent = normasUnicas.size;
+
+            // Estatísticas por anotador
+            const statsAnotadores = {};
+            anotacoes.forEach(a => {
+                if (!a.anotador) return;
+                if (!statsAnotadores[a.anotador]) {
+                    statsAnotadores[a.anotador] = { count: 0, tipos: {} };
+                }
+                statsAnotadores[a.anotador].count++;
+                const tipo = a.situacao;
+                statsAnotadores[a.anotador].tipos[tipo] = (statsAnotadores[a.anotador].tipos[tipo] || 0) + 1;
+            });
+
+            const listaAnotadores = Object.entries(statsAnotadores)
+                .sort((a, b) => b[1].count - a[1].count)
+                .map(([nome, stats]) => {
+                    const tiposTexto = Object.entries(stats.tipos)
+                        .map(([tipo, count]) => `${tipo}: ${count}`)
+                        .join(', ');
+                    return `
+                        <div class="stats-item">
+                            <div>
+                                <div class="name">${nome}</div>
+                                <div class="types">${tiposTexto}</div>
+                            </div>
+                            <div class="count">${stats.count}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            document.getElementById('stats-anotadores-list').innerHTML = listaAnotadores || '<div style="text-align: center; padding: 20px; color: #999;">Nenhum anotador registrado</div>';
+
+            // Estatísticas por anotado
+            const statsAnotados = {};
+            anotacoes.forEach(a => {
+                const key = `${a.nomeGuerra} (${a.turma})`;
+                if (!statsAnotados[key]) {
+                    statsAnotados[key] = { count: 0, tipos: {}, numero: a.numero };
+                }
+                statsAnotados[key].count++;
+                const tipo = a.situacao;
+                statsAnotados[key].tipos[tipo] = (statsAnotados[key].tipos[tipo] || 0) + 1;
+            });
+
+            const listaAnotados = Object.entries(statsAnotados)
+                .sort((a, b) => b[1].count - a[1].count)
+                .map(([nome, stats]) => {
+                    const tiposTexto = Object.entries(stats.tipos)
+                        .map(([tipo, count]) => `${tipo}: ${count}`)
+                        .join(', ');
+                    return `
+                        <div class="stats-item">
+                            <div>
+                                <div class="name">${nome} - Nº ${stats.numero}</div>
+                                <div class="types">${tiposTexto}</div>
+                            </div>
+                            <div class="count">${stats.count}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            document.getElementById('stats-anotados-list').innerHTML = listaAnotados;
+
+            // Estatísticas por norma
+            const statsNormas = {};
+            anotacoes.forEach(a => {
+                if (!a.norma) return;
+                const key = `${a.norma} (${a.grau || 'Sem grau'})`;
+                if (!statsNormas[key]) {
+                    statsNormas[key] = { count: 0, situacoes: {} };
+                }
+                statsNormas[key].count++;
+                const situacao = a.situacao;
+                statsNormas[key].situacoes[situacao] = (statsNormas[key].situacoes[situacao] || 0) + 1;
+            });
+
+            const listaNormas = Object.entries(statsNormas)
+                .sort((a, b) => b[1].count - a[1].count)
+                .map(([norma, stats]) => {
+                    const situacoesTexto = Object.entries(stats.situacoes)
+                        .map(([sit, count]) => `${sit}: ${count}`)
+                        .join(', ');
+                    return `
+                        <div class="stats-item">
+                            <div>
+                                <div class="name">${norma}</div>
+                                <div class="types">${situacoesTexto}</div>
+                            </div>
+                            <div class="count">${stats.count}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            document.getElementById('stats-normas-list').innerHTML = listaNormas || '<div style="text-align: center; padding: 20px; color: #999;">Nenhuma norma registrada</div>';
+        }
+
+        function showStatsTab(tab) {
+            statsTabAtual = tab;
+
+            // Atualizar botões
+            document.querySelectorAll('#stats-modal .filter-chip').forEach(chip => chip.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Mostrar lista correspondente
+            document.getElementById('stats-anotadores-list').style.display = tab === 'anotadores' ? 'block' : 'none';
+            document.getElementById('stats-anotados-list').style.display = tab === 'anotados' ? 'block' : 'none';
+            document.getElementById('stats-normas-list').style.display = tab === 'normas' ? 'block' : 'none';
+        }
+
+        // ==================== GERAR PDF ESTATÍSTICO ====================
+        function generateStatsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            const sessaoUsuario = JSON.parse(localStorage.getItem('sessaoUsuario') || '{}');
+            const unidadeUsuario = sessaoUsuario.unidade || 'Unidade';
+
+            // Cabeçalho
+            doc.setFillColor(26, 35, 126);
+            doc.rect(0, 0, doc.internal.pageSize.getWidth(), 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RELATÓRIO ESTATÍSTICO DE ANOTAÇÕES', doc.internal.pageSize.getWidth() / 2, 12, { align: 'center' });
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(unidadeUsuario + ' | Gerado em: ' + new Date().toLocaleDateString('pt-BR'), doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+            doc.text(`Total de anotações: ${anotacoes.length}`, doc.internal.pageSize.getWidth() / 2, 26, { align: 'center' });
+
+            let currentY = 35;
+
+            // Estatísticas por Anotador
+            doc.setFontSize(12);
+            doc.setTextColor(26, 35, 126);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ESTATÍSTICAS POR ANOTADOR', 10, currentY);
+            currentY += 8;
+
+            const statsAnotadores = {};
+            anotacoes.forEach(a => {
+                if (!a.anotador) return;
+                if (!statsAnotadores[a.anotador]) {
+                    statsAnotadores[a.anotador] = { count: 0, tipos: {} };
+                }
+                statsAnotadores[a.anotador].count++;
+                statsAnotadores[a.anotador].tipos[a.situacao] = (statsAnotadores[a.anotador].tipos[a.situacao] || 0) + 1;
+            });
+
+            const anotadoresData = Object.entries(statsAnotadores)
+                .sort((a, b) => b[1].count - a[1].count)
+                .map(([nome, stats]) => {
+                    const tiposTexto = Object.entries(stats.tipos)
+                        .map(([tipo, count]) => `${tipo}: ${count}`)
+                        .join(', ');
+                    return [nome, stats.count.toString(), tiposTexto];
+                });
+
+            if (anotadoresData.length > 0) {
+                doc.autoTable({
+                    head: [['Anotador', 'Total', 'Distribuição por Tipo']],
+                    body: anotadoresData,
+                    startY: currentY,
+                    margin: { left: 10, right: 10 },
+                    styles: { fontSize: 9, cellPadding: 4 },
+                    headStyles: { fillColor: [26, 35, 126], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 50 },
+                        1: { cellWidth: 20, halign: 'center' },
+                        2: { cellWidth: 'auto' }
+                    }
+                });
+                currentY = doc.lastAutoTable.finalY + 12;
+            } else {
+                doc.setFontSize(10);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Nenhum anotador registrado', 10, currentY);
+                currentY += 10;
+            }
+
+            // Nova página se necessário
+            if (currentY > 200) {
+                doc.addPage();
+                currentY = 20;
+            }
+
+            // Estatísticas por Anotado
+            doc.setFontSize(12);
+            doc.setTextColor(26, 35, 126);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ESTATÍSTICAS POR ANOTADO', 10, currentY);
+            currentY += 8;
+
+            const statsAnotados = {};
+            anotacoes.forEach(a => {
+                const key = `${a.nomeGuerra} - ${a.turma}`;
+                if (!statsAnotados[key]) {
+                    statsAnotados[key] = { count: 0, tipos: {}, numero: a.numero };
+                }
+                statsAnotados[key].count++;
+                statsAnotados[key].tipos[a.situacao] = (statsAnotados[key].tipos[a.situacao] || 0) + 1;
+            });
+
+            const anotadosData = Object.entries(statsAnotados)
+                .sort((a, b) => b[1].count - a[1].count)
+                .map(([nome, stats]) => {
+                    const tiposTexto = Object.entries(stats.tipos)
+                        .map(([tipo, count]) => `${tipo}: ${count}`)
+                        .join(', ');
+                    return [nome, `Nº ${stats.numero}`, stats.count.toString(), tiposTexto];
+                });
+
+            if (anotadosData.length > 0) {
+                doc.autoTable({
+                    head: [['Nome/Turma', 'Número', 'Total', 'Distribuição por Tipo']],
+                    body: anotadosData,
+                    startY: currentY,
+                    margin: { left: 10, right: 10 },
+                    styles: { fontSize: 8, cellPadding: 3 },
+                    headStyles: { fillColor: [26, 35, 126], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 50 },
+                        1: { cellWidth: 20, halign: 'center' },
+                        2: { cellWidth: 15, halign: 'center' },
+                        3: { cellWidth: 'auto' }
+                    }
+                });
+                currentY = doc.lastAutoTable.finalY + 12;
+            }
+
+            // Nova página se necessário
+            if (currentY > 220) {
+                doc.addPage();
+                currentY = 20;
+            }
+
+            // Estatísticas por Norma
+            doc.setFontSize(12);
+            doc.setTextColor(26, 35, 126);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ESTATÍSTICAS POR NORMA', 10, currentY);
+            currentY += 8;
+
+            const statsNormas = {};
+            anotacoes.forEach(a => {
+                if (!a.norma) return;
+                const key = `${a.norma} (${a.grau || 'Sem grau'})`;
+                if (!statsNormas[key]) {
+                    statsNormas[key] = { count: 0, situacoes: {} };
+                }
+                statsNormas[key].count++;
+                statsNormas[key].situacoes[a.situacao] = (statsNormas[key].situacoes[a.situacao] || 0) + 1;
+            });
+
+            const normasData = Object.entries(statsNormas)
+                .sort((a, b) => b[1].count - a[1].count)
+                .map(([norma, stats]) => {
+                    const situacoesTexto = Object.entries(stats.situacoes)
+                        .map(([sit, count]) => `${sit}: ${count}`)
+                        .join(', ');
+                    return [norma, stats.count.toString(), situacoesTexto];
+                });
+
+            if (normasData.length > 0) {
+                doc.autoTable({
+                    head: [['Norma (Grau)', 'Total', 'Distribuição por Situação']],
+                    body: normasData,
+                    startY: currentY,
+                    margin: { left: 10, right: 10 },
+                    styles: { fontSize: 9, cellPadding: 4 },
+                    headStyles: { fillColor: [26, 35, 126], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 50 },
+                        1: { cellWidth: 20, halign: 'center' },
+                        2: { cellWidth: 'auto' }
+                    }
+                });
+            } else {
+                doc.setFontSize(10);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Nenhuma norma registrada', 10, currentY);
+            }
+
+            doc.save(`relatorio_estatistico_anotacoes_${new Date().toISOString().split('T')[0]}.pdf`);
+            showToast('PDF estatístico gerado com sucesso!');
+        }
+
+        // Event listeners para fechar modais ao clicar fora
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        document.getElementById('report-type-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'report-type-modal') closeReportTypeModal();
+        });
+
+        document.getElementById('pdf-filter-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'pdf-filter-modal') closePdfFilterModal();
+        });
+
+        document.getElementById('stats-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'stats-modal') closeStatsModal();
+        });
+    </script>
+</body>
+</html>
